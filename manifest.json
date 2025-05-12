@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "TransltorUpdator",
+  "version": "0.1",
+  "description": "A Zotero plugin to update Persian translators",
+  "homepage_url": "https://github.com/Zotero-Project/TransltorUpdator",
+  "applications": {
+    "zotero": {
+      "id": "TransltorUpdator@zotero-project",
+      "update_url": "https://zotero-project.github.io/TranslatorUpdator/updates.json",
+      "strict_min_version": "6.999",
+      "strict_max_version": "7.1.*"
+    }
+  }
+}

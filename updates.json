@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "TransltorUpdator@zotero-project": {
+      "updates": [
+        {
+          "version": "0.1",
+          "update_link": "https://zotero-project.github.io/TranslatorUpdator/TransltorUpdator.xpi"
+        }
+      ]
+    }
+  }
+}
