@@ -1,0 +1,1 @@
+clipboard-pdf-copy = کپی PDF از کلیپ‌بورد clipboard-pdf-move = انتقال PDF از کلیپ‌بورد clipboard-pdf-move-to-desktop = انتقال به دسکتاپ و حذف
