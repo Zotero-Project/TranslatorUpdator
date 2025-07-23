@@ -15,7 +15,7 @@ Zotero doesn't support many Iranian content platforms by default. This plugin in
 - [Asmaneketab.ir](https://asmaneketab.ir)
 - [PersianPDF.com](https://persianpdf.com)
 - [LiteratureLib.com](https://literaturelib.com)
-- [asmaneketab.ir]([https://ketabrah.ir](https://asmaneketab.ir/))
+- [asmaneketab.ir](https://asmaneketab.ir/)
 - [molapub.ir](https://www.molapub.ir/)
 - More sites planned…
 
