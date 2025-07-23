@@ -1,20 +1,37 @@
-# UpdateTranslator for Zotero
+# 📦 UpdateTranslator for Zotero
 
-**UpdateTranslator** is a lightweight Zotero plugin that updates and adds support for Persian (Iranian) content websites not included in Zotero's official translators.
+**UpdateTranslator** is a lightweight plugin for Zotero that improves Persian content support and streamlines file handling in Zotero.
 
 ---
 
 ## 🌐 What Does This Plugin Do?
 
-Zotero is a powerful research tool, but it lacks out-of-the-box support for many popular Persian academic and content websites. This plugin:
+This plugin has **two main features**:
 
-- Automatically installs or updates translators for Persian websites.
-- Adds support for commonly used Persian e-book and literature platforms such as:
-  - [Asmaneketab.ir](https://asmaneketab.ir)
-  - [PersianPDF.com](https://persianpdf.com)
-  - [LiteratureLib.com](https://literaturelib.com)
-  - And several others to be added in future updates
-- Keeps your Zotero ready for Persian research content.
+### 1. ✨ Adds and Updates Zotero Translators for Persian Websites
+
+Zotero doesn't support many Iranian content platforms by default. This plugin installs and updates a curated set of **8 specialized translators** for popular Persian websites, such as:
+
+- [Asmaneketab.ir](https://asmaneketab.ir)
+- [PersianPDF.com](https://persianpdf.com)
+- [LiteratureLib.com](https://literaturelib.com)
+- [asmaneketab.ir]([https://ketabrah.ir](https://asmaneketab.ir/))
+- [molapub.ir](https://www.molapub.ir/)
+- More sites planned…
+
+The translators are hosted on:
+
+🔗 **[https://translatorupdator.ir/](https://translatorupdator.ir/)**
+
+### 2. 🖱️ Drag & Paste File Support with Shortcuts
+
+Managing attachments is now easier than ever:
+
+- Quickly **paste files** (PDF, images, etc.) into Zotero using:
+  - Custom **keyboard shortcuts**
+  - Built-in **toolbar buttons**
+- Avoids manual drag-and-drop from File Explorer.
+- Seamlessly adds attachments to selected Zotero items.
 
 ---
 
@@ -25,23 +42,24 @@ Zotero is a powerful research tool, but it lacks out-of-the-box support for many
 3. Drag and drop the `.xpi` file into the Zotero window.
 4. Restart Zotero if prompted.
 
-✅ Done! Your translators are now managed and updated.
+✅ Done! You're ready to go.
 
 ---
 
-## 📚 How It Works
+## 🔄 How It Works
 
-After installation, the plugin integrates with Zotero’s translator system. It installs updated translators for Persian websites and periodically checks for new ones as they are released.
-
-No data is shared or synced externally. Everything runs locally within Zotero.
+- On startup, the plugin installs or updates all translators from the central source.
+- The file paste feature hooks into Zotero’s UI, adds buttons and shortcut handlers.
+- No user data is sent externally — all processes run locally.
 
 ---
 
 ## 🛠️ Developer Notes
 
-- The plugin uses Zotero’s official plugin API.
-- Translators are stored and updated from a local directory or remote Git repository.
-- You can contribute by submitting translators for more Persian websites under [`/translators/`](./translators/).
+- Built using Zotero’s official plugin and translator APIs.
+- Translators are fetched from `https://translatorupdator.ir/translators/`.
+- File paste integrates with Zotero’s item attachment APIs.
+- Contributions welcome! Add translators under [`/translators/`](./translators/).
 
 ---
 
@@ -49,11 +67,11 @@ No data is shared or synced externally. Everything runs locally within Zotero.
 
 - Email: [you@example.com](mailto:you@example.com)
 - Telegram: [@YourUsername](https://t.me/YourUsername)
-- GitHub Issues: Feel free to open an issue for bugs, feature requests, or help.
+- GitHub Issues: [Open an issue](https://github.com/YourRepo/issues) for bugs or feature requests.
 
 ---
 
-## 🔖 License
+## 📄 License
 
 MIT License. See [LICENSE](./LICENSE) for details.
 
