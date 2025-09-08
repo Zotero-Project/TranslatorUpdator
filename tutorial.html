@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>آموزش پلاگین</title>
+  <style>
+    body { font-family: system-ui, tahoma, sans-serif; margin: 0; background: #f7f7f9; color: #222; }
+    header { background: #4a6ea9; color: #fff; padding: 14px 18px; }
+    header h1 { margin: 0; font-size: 18px; }
+    main { padding: 18px; max-width: 900px; margin: 0 auto; }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; margin-bottom: 14px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+    .list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+    .tile { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; cursor: pointer; transition: box-shadow .2s, transform .05s; text-decoration: none; color: inherit; }
+    .tile:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .tile:active { transform: translateY(1px); }
+    .muted { color: #6b7280; font-size: 13px; }
+    .actions { display: flex; gap: 8px; margin-bottom: 14px; }
+    .btn { appearance: none; border: 1px solid #d1d5db; background: #fff; color: #374151; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 14px; }
+    .btn:hover { background: #f3f4f6; }
+    .kbd { display: inline-block; border: 1px solid #d1d5db; border-bottom-width: 2px; padding: 0 6px; border-radius: 6px; background: #f9fafb; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    h2 { margin-top: 0; font-size: 18px; }
+    ul { margin: 8px 0 0 0; }
+    li { margin: 6px 0; }
+    footer { text-align: center; color: #9ca3af; font-size: 12px; padding: 14px; }
+    .hidden { display: none; }
+  </style>
+  <script>
+    function show(view) {
+      document.querySelectorAll('[data-view]')
+        .forEach(el => el.classList.toggle('hidden', el.getAttribute('data-view') !== view));
+    }
+    function onHashChange() {
+      const hash = (location.hash || '#').replace('#','');
+      if (!hash) { show('home'); return; }
+      if (hash === 'cutpaste') { show('cutpaste'); return; }
+      if (hash === 'addtab') { show('addtab'); return; }
+      show('home');
+    }
+    window.addEventListener('hashchange', onHashChange);
+    window.addEventListener('DOMContentLoaded', onHashChange);
+  </script>
+  <!-- Prevent external navigation from being blocked in Zotero chrome window -->
+  <base target="_self">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:; img-src 'self' data:; style-src 'self' 'unsafe-inline';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="Referrer-Policy" content="no-referrer" />
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+  <meta http-equiv="Permissions-Policy" content="clipboard-read=(); clipboard-write=()" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="color-scheme" content="light" />
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Language" content="fa">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <header>
+    <h1>آموزش پلاگین</h1>
+  </header>
+  <main>
+    <!-- Home view -->
+    <section class="card" data-view="home">
+      <h2>چه چیزی می‌خواهید یاد بگیرید؟</h2>
+      <p class="muted">یکی از گزینه‌های زیر را انتخاب کنید.</p>
+      <div class="list">
+        <a class="tile" href="#addtab">
+          <strong>آموزش افزودن تب</strong>
+          <div class="muted">باز کردن همزمان چند صفحه زوترو</div>
+        </a>
+        <a class="tile" href="#cutpaste">
+          <strong>آموزش کات/پیست</strong>
+          <div class="muted">انتقال/کپی فایل‌ها از ویندوز به زوترو</div>
+        </a>
+      </div>
+    </section>
+
+    <!-- Cut/Paste tutorial -->
+    <section class="card hidden" data-view="cutpaste">
+      <div class="actions">
+        <a class="btn" href="#">بازگشت</a>
+      </div>
+      <h2>آموزش کات/پیست</h2>
+      <p>
+        با این قابلیت امکان انتقال یا کپی فایل ها از ویندوز به زوترو فراهم شده است.
+        شامل دو حالت است که در بخش <strong>پلاگین → انتقال از کلیپ‌برد</strong> قابل دسترسی و تنظیم هستند.
+      </p>
+      <ul>
+        <li><strong>حالت خاص:</strong> فایل‌های انتخاب‌شده از ویندوز در هر صورت به زوترو منتقل می‌شوند و از مبدأ حذف می‌شوند.</li>
+        <li><strong>حالت عادی:</strong> اگر فایل از ویندوز کات شده باشد به زوترو منتقل، و اگر کپی شده باشد در زوترو یک کپی ایجاد می‌شود.</li>
+      </ul>
+      <h3>کلیدهای میانبر</h3>
+      <ul>
+        <li><span class="kbd">Ctrl</span> + <span class="kbd">V</span>: پیست شدن فایل کپی یا کات شده از ویندوز به زوترو</li>
+        <li><span class="kbd">Ctrl</span> + <span class="kbd">B</span>: در حقیقت همان <span class="kbd">Ctrl</span> + <span class="kbd">Z</span> است؛ فایل منتقل شده را به مبدأ باز می‌گرداند. به دلیل اینکه میانبر <span class="kbd">Ctrl</span> + <span class="kbd">Z</span> در زوترو برای کار دیگری تنظیم شده است، این عملکرد با این میانبر قرار داده شده است.</li>
+      </ul>
+    </section>
+
+    <!-- Add Tab tutorial -->
+    <section class="card hidden" data-view="addtab">
+      <div class="actions">
+        <a class="btn" href="#">بازگشت</a>
+      </div>
+      <h2>آموزش افزودن تب</h2>
+      <p>
+        با این قابلیت می‌توان هر تعداد از صفحات زوترو را به‌طور هم‌زمان باز کرد و در هر یک فعالیت مدنظر را انجام داد.
+        برای این کار باید دکمه <strong>افزودن تب</strong> را در بخش <strong>پلاگین</strong> بزنید.
+      </p>
+    </section>
+  </main>
+  <footer>نسخه آموزش داخلی پلاگین</footer>
+</body>
+</html>
+

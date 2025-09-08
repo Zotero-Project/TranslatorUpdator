@@ -1,0 +1,15 @@
+{
+  "manifest_version": 2,
+  "name": "TranslatorUpdator",
+  "version": "0.1",
+  "description": "this is TranslatorUpdator plugin",
+  "homepage_url": "https://github.com/mfayyazb/base_plug",
+  "applications": {
+    "zotero": {
+      "id": "TranslatorUpdator@local.dev",
+      "update_url": "https://example.com/updates.json",
+      "strict_min_version": "6.999",
+      "strict_max_version": "7.1.*"
+    }
+  }
+}

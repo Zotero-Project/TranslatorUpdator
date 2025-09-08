@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>راهنما و آموزش</title>
+  <style>
+    :root {
+      --bg: #f7f7f9;
+      --card: #fff;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --accent: #4a6ea9;
+      --accent-600: #3d5e95;
+    }
+    html, body { height: 100%; }
+    body { margin: 0; font-family: system-ui, tahoma, sans-serif; background: var(--bg); color: #1f2937; }
+    header { background: var(--accent); color: #fff; padding: 14px 18px; }
+    header h1 { margin: 0; font-size: 18px; }
+    main { padding: 16px; max-width: 1100px; margin: 0 auto; }
+
+    /* Layout similar to Zotero preferences: content + right sidebar */
+    .layout { display: grid; grid-template-columns: 1fr 260px; gap: 12px; align-items: start; }
+    .content { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-height: 420px; }
+    .sidebar { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
+    .sidebar h2 { font-size: 14px; margin: 6px 8px 10px; color: var(--muted); font-weight: 600; }
+    .side-list { display: flex; flex-direction: column; gap: 6px; }
+    .side-btn { appearance: none; border: 1px solid transparent; background: transparent; border-radius: 8px; padding: 10px 12px; text-align: start; cursor: pointer; font-size: 14px; color: #111827; }
+    .side-btn:hover { background: #f3f4f6; }
+    .side-btn[aria-selected="true"] { background: #eef2ff; border-color: #c7d2fe; color: #1e3a8a; }
+
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .muted { color: var(--muted); font-size: 13px; }
+    h2 { margin: 0 0 10px; font-size: 18px; }
+    p { margin: 8px 0; line-height: 1.75; }
+    ul { margin: 8px 0; padding: 0 18px; }
+    li { margin: 6px 0; }
+    .kbd { display: inline-block; border: 1px solid #d1d5db; border-bottom-width: 2px; padding: 0 6px; border-radius: 6px; background: #f9fafb; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+  </style>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' data:; img-src 'self' data:; style-src 'self' 'unsafe-inline';" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="Referrer-Policy" content="no-referrer" />
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+  <meta http-equiv="Permissions-Policy" content="clipboard-read=(); clipboard-write=()" />
+</head>
+<body>
+  <header>
+    <h1>راهنما و آموزش</h1>
+  </header>
+  <main>
+    <div class="layout" id="layout">
+      <section class="content" id="content" aria-live="polite">
+        <!-- Add Tab -->
+        <article class="section" id="view-addtab" role="tabpanel" aria-labelledby="btn-addtab" data-view="addtab">
+          <h2>افزایش تب های زوترو</h2>
+          <p>با استفاده از این قابلیت امکان باز کردن چند صفحه زوترو به صورت همزمان ایجاد شده است.</p>
+          <p>با استفاده از دکمه افزودن صفحه در قسمت پلاگین، میتوان صفحه جدیدی در زوترو باز کرد.</p>
+        </article>
+
+        <!-- Clipboard Import -->
+        <article class="section" id="view-cutpaste" role="tabpanel" aria-labelledby="btn-cutpaste" data-view="cutpaste">
+          <h2>انتقال فایل از ویندوز با کلید میانبر</h2>
+          <p>با این قابلیت، امکان انتقال فایل ها از ویندوز به زوترو با استفاده از کلید های میانبر ویندوز فراهم شده است.</p>
+          <ul>
+            <li><span class="kbd">crtl</span> + <span class="kbd">V</span>: انتقال فایل انتخاب شده از ویندوز به محل مورد نظر در زوترو</li>
+            <li><span class="kbd">ctrl</span> + <span class="kbd">B</span>: عملکرد آن مانند <span class="kbd">ctrl</span> + <span class="kbd">z</span> است، یعنی فایل منتقل شده را به مبدا آن در ویندوز باز میگرداند.</li>
+          </ul>
+          <p>
+            عملکرد این قابلیت دوگانه است؛ در قسمت انتقال از کلیپ برد در بخش پلاگین، میتوان یکی از این دو حالت را انتخاب کرد، حالت همیشه انتقال که حالتی مخصوص است، اگر در ویندوز فایلی کپی یا کات شود، هنگام پیست داخل زوترو فایل به زوترو انتقال داده شده و از ویندوز حذف میشود. حالت دوم که حالت عادی است، کپی و کات هرکدام به ترتیب فایل را داخل زوترو کپی کرده یا انتقال میدهند.
+          </p>
+        </article>
+      </section>
+
+      <aside class="sidebar" id="sidebar" role="tablist" aria-label="گزینه‌های آموزش">
+        <h2 class="muted">قابلیت‌ها</h2>
+        <div class="side-list">
+          <button class="side-btn" id="btn-addtab" role="tab" aria-selected="false" data-target="addtab">افزودن تب</button>
+          <button class="side-btn" id="btn-cutpaste" role="tab" aria-selected="false" data-target="cutpaste">انتقال فایل از ویندوز با کلید میانبر</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      function select(view){
+        document.querySelectorAll('.section').forEach(sec => {
+          const active = sec.getAttribute('data-view') === view;
+          sec.classList.toggle('active', active);
+          if (active) sec.removeAttribute('hidden'); else sec.setAttribute('hidden','');
+        });
+        document.querySelectorAll('.side-btn').forEach(btn => {
+          const active = btn.getAttribute('data-target') === view;
+          btn.setAttribute('aria-selected', active ? 'true' : 'false');
+        });
+      }
+
+      function applyFromHash(){
+        const hash = (location.hash || '#addtab').replace('#','');
+        const view = hash === 'cutpaste' ? 'cutpaste' : 'addtab';
+        select(view);
+      }
+
+      document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.side-btn');
+        if (!btn) return;
+        const target = btn.getAttribute('data-target');
+        if (!target) return;
+        location.hash = target;
+      });
+
+      window.addEventListener('hashchange', applyFromHash);
+      window.addEventListener('DOMContentLoaded', applyFromHash);
+    })();
+  </script>
+</body>
+</html>

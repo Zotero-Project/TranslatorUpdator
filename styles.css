@@ -1,0 +1,17 @@
+/* استایل‌های اولیه برای پنجره پیشرفت */
+.progress-text {
+  font-size: 14px;
+  color: #333;
+  padding: 5px;
+  text-align: center;
+}
+
+.progress-completed {
+  font-weight: bold;
+  color: #2e7d32;
+}
+
+.progress-error {
+  font-weight: bold;
+  color: #d32f2f;
+}
