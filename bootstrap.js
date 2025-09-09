@@ -88,18 +88,7 @@ async function startup({ id, version, rootURI }) {
     log("Error loading libraries_collections_alltypes: " + e);
   }
 
-  // Windows: register "Open with Zotero" for PDFs and handle incoming opens
-  try {
-    Services.scriptloader.loadSubScript(rootURI + "open_with_windows.js");
-    if (typeof ZoteroOpenWithPDF !== "undefined") {
-      ZoteroOpenWithPDF.init({ id: id + ":open-with", rootURI });
-      log("ZoteroOpenWithPDF initialized");
-    } else {
-      log("ZoteroOpenWithPDF is undefined after load");
-    }
-  } catch (e) {
-    log("Error loading open_with_windows: " + e);
-  }
+  // (Removed) Windows Open With integration
 
   // Attachment Locker (password gate on files)
   try {
@@ -123,7 +112,7 @@ function onMainWindowLoad({ window }) {
   try { if (typeof ScrollbarColorizer !== "undefined") ScrollbarColorizer.addToWindow(window); } catch {}
   try { if (typeof LightThemeTweaks !== "undefined") LightThemeTweaks.addToWindow(window); } catch {}
   try { if (typeof LibrariesCollectionsAllTypes !== "undefined") LibrariesCollectionsAllTypes.addToWindow(window); } catch {}
-  try { if (typeof ZoteroOpenWithPDF !== "undefined") ZoteroOpenWithPDF.addToWindow(window); } catch {}
+  
   try { if (typeof AttachmentLocker !== "undefined") AttachmentLocker.addToWindow(window); } catch {}
 }
 
@@ -134,7 +123,7 @@ function onMainWindowUnload({ window }) {
   try { if (typeof ScrollbarColorizer !== "undefined") ScrollbarColorizer.removeFromWindow(window); } catch {}
   try { if (typeof LightThemeTweaks !== "undefined") LightThemeTweaks.removeFromWindow(window); } catch {}
   try { if (typeof LibrariesCollectionsAllTypes !== "undefined") LibrariesCollectionsAllTypes.removeFromWindow(window); } catch {}
-  try { if (typeof ZoteroOpenWithPDF !== "undefined") ZoteroOpenWithPDF.removeFromWindow(window); } catch {}
+  
   try { if (typeof AttachmentLocker !== "undefined") AttachmentLocker.removeFromWindow(window); } catch {}
 }
 

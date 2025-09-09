@@ -43,9 +43,11 @@ AttachmentLocker = {
     let salt = this._makeSalt();
     map[item.key] = { salt, hash: this._hash(salt + '|' + password) };
     this._saveMap(map);
+    try { this._refreshAttachmentInfoVisibility(Zotero.getMainWindow()); } catch {}
   },
   clearLock(item) {
     let map = this._loadMap(); delete map[item.key]; this._saveMap(map);
+    try { this._refreshAttachmentInfoVisibility(Zotero.getMainWindow()); } catch {}
   },
   async _checkPassword(item, windowHint) {
     const map = this._loadMap();
@@ -63,27 +65,128 @@ AttachmentLocker = {
   },
 
   async _promptSetPassword(win) {
+    // Revert to two-step native prompt dialogs for a clean, consistent UI
     const ps = Services.prompt;
-    const rules = 'رمز بین ۶ تا ۲۲ کاراکتر و شامل حروف انگلیسی، اعداد و سمبل‌ها باشد.';
+    const invalidMsg = 'رمز یا تکرار آن قابل قبول نیست، لطفا دوباره تلاش کنید';
     while (true) {
       let p1 = { value: '' };
-      let ok1 = ps.promptPassword(win, 'رمزگذاری فایل', rules + '\n\nرمز را وارد کنید:', p1, null, {});
+      let ok1 = ps.promptPassword(
+        win,
+        'رمزگذاری فایل',
+        'رمز باید بین ۶ تا ۲۲ کاراکتر باشد.\n\nرمز را وارد کنید:',
+        p1,
+        null,
+        {}
+      );
       if (!ok1) return null;
+
       let p2 = { value: '' };
-      let ok2 = ps.promptPassword(win, 'تایید رمز', 'رمز را دوباره وارد کنید:', p2, null, {});
+      let ok2 = ps.promptPassword(
+        win,
+        'تکرار رمز',
+        'تکرار رمز را وارد کنید:',
+        p2,
+        null,
+        {}
+      );
       if (!ok2) return null;
-      let valid = this._validatePassword(p1.value);
-      if (!valid) { ps.alert(win, 'رمز نامعتبر', 'قوانین رمز را رعایت کنید.'); continue; }
-      if (p1.value !== p2.value) { ps.alert(win, 'عدم تطابق', 'تکرار رمز با رمز یکسان نیست.'); continue; }
-      return p1.value;
+
+      let pw = p1.value || '';
+      let rep = p2.value || '';
+      if (!this._validatePassword(pw) || pw !== rep) {
+        ps.alert(win, 'خطا', invalidMsg);
+        continue;
+      }
+      return pw;
     }
   },
   _validatePassword(pw) {
-    if (!pw || pw.length < 6 || pw.length > 22) return false;
-    let hasLetter = /[A-Za-z]/.test(pw);
-    let hasDigit = /\d/.test(pw);
-    let hasSymbol = /[^A-Za-z0-9]/.test(pw);
-    return hasLetter && hasDigit && hasSymbol;
+    // Rule: any combination of letters/numbers/symbols, length 6..22
+    return !!pw && pw.length >= 6 && pw.length <= 22;
+  },
+
+  _ensurePasswordPanel(win) {
+    const doc = win.document;
+    let panel = doc.getElementById('tu-pw-panel');
+    if (panel) return panel;
+    panel = doc.createXULElement('panel');
+    panel.id = 'tu-pw-panel';
+    panel.setAttribute('animate', 'false');
+    panel.style.padding = '12px';
+    panel.style.width = '360px';
+    panel.style.maxWidth = '360px';
+    panel.style.borderRadius = '8px';
+
+    const xhtml = 'http://www.w3.org/1999/xhtml';
+    const wrap = doc.createElementNS(xhtml, 'div');
+    wrap.style.display = 'flex';
+    wrap.style.flexDirection = 'column';
+    wrap.style.gap = '8px';
+
+    const rules = doc.createElementNS(xhtml, 'div');
+    rules.textContent = 'رمز باید بین ۶ تا ۲۲ کاراکتر باشد.';
+    rules.style.fontSize = '12px';
+    rules.style.color = '#555';
+
+    const row1 = doc.createElementNS(xhtml, 'div');
+    const lbl1 = doc.createElementNS(xhtml, 'label');
+    lbl1.textContent = 'رمز:';
+    const inp1 = doc.createElementNS(xhtml, 'input');
+    inp1.type = 'password'; inp1.id = 'tu-pw-input';
+    inp1.style.padding = '6px 8px';
+    row1.appendChild(lbl1); row1.appendChild(inp1);
+
+    const row2 = doc.createElementNS(xhtml, 'div');
+    const lbl2 = doc.createElementNS(xhtml, 'label');
+    lbl2.textContent = 'تکرار رمز:';
+    const inp2 = doc.createElementNS(xhtml, 'input');
+    inp2.type = 'password'; inp2.id = 'tu-pw-repeat';
+    inp2.style.padding = '6px 8px';
+    row2.appendChild(lbl2); row2.appendChild(inp2);
+
+    const btns = doc.createElementNS(xhtml, 'div');
+    btns.style.display = 'flex'; btns.style.justifyContent = 'flex-end'; btns.style.gap = '8px';
+    const cancel = doc.createElementNS(xhtml, 'button'); cancel.textContent = 'انصراف';
+    const ok = doc.createElementNS(xhtml, 'button'); ok.textContent = 'تایید';
+    btns.appendChild(cancel); btns.appendChild(ok);
+
+    wrap.appendChild(rules); wrap.appendChild(row1); wrap.appendChild(row2); wrap.appendChild(btns);
+    panel.appendChild(wrap);
+
+    doc.documentElement.appendChild(panel);
+
+    panel.__tu_getValues = () => ({ password: inp1.value, repeat: inp2.value });
+    panel.__tu_focus = () => inp1.focus();
+    panel.__tu_buttons = { ok, cancel };
+    return panel;
+  },
+
+  _showPasswordPanel(win) {
+    return new Promise((resolve) => {
+      try {
+        const panel = this._ensurePasswordPanel(win);
+        const { ok, cancel } = panel.__tu_buttons;
+
+        const cleanup = () => {
+          panel.hidePopup();
+          ok.removeEventListener('click', onOk);
+          cancel.removeEventListener('click', onCancel);
+          win.removeEventListener('keydown', onKey);
+        };
+        const onOk = () => { const v = panel.__tu_getValues(); cleanup(); resolve({ ok: true, ...v }); };
+        const onCancel = () => { cleanup(); resolve({ ok: false }); };
+        const onKey = (ev) => { if (ev.key === 'Escape') onCancel(); if (ev.key === 'Enter') onOk(); };
+        ok.addEventListener('click', onOk);
+        cancel.addEventListener('click', onCancel);
+        win.addEventListener('keydown', onKey);
+
+        // Center on screen
+        const x = win.screenX + Math.max(0, (win.outerWidth - 380) / 2);
+        const y = win.screenY + Math.max(0, (win.outerHeight - 220) / 2);
+        panel.openPopupAtScreen(x, y, true);
+        panel.__tu_focus();
+      } catch (e) { this.log('_showPasswordPanel error: ' + e); resolve({ ok: false }); }
+    });
   },
 
   // ---------- Menu ----------
@@ -272,6 +375,55 @@ AttachmentLocker = {
           });
           doc.__tu_lock_menu_patched = true;
         }
+
+        // Wrap selection to refresh visibility of attachment info
+        if (zp && !zp.__tu_select_patched) {
+          const origSelItem = zp.selectItem.bind(zp);
+          zp.selectItem = async (...args) => {
+            let r = await origSelItem(...args);
+            try { AttachmentLocker._refreshAttachmentInfoVisibility(window); } catch {}
+            return r;
+          };
+          const origSelItems = zp.selectItems.bind(zp);
+          zp.selectItems = async (...args) => {
+            let r = await origSelItems(...args);
+            try { AttachmentLocker._refreshAttachmentInfoVisibility(window); } catch {}
+            return r;
+          };
+          zp.__tu_select_patched = true;
+        }
+
+        // Initial refresh
+        this._refreshAttachmentInfoVisibility(window);
+      }
+
+      // Patch item-details.render to re-apply visibility rules after every render
+      const tryPatchDetails = () => {
+        try {
+          const details = window.ZoteroPane?.itemPane?._itemDetails;
+          if (!details || details.__tu_render_patched) return !!details;
+          const origRender = details.render?.bind(details);
+          if (typeof origRender !== 'function') return false;
+          details.render = function (...args) {
+            const r = origRender(...args);
+            try { AttachmentLocker._refreshAttachmentInfoVisibility(window); } catch {}
+            return r;
+          };
+          details.__tu_render_patched = true;
+          // Also refresh once now
+          try { AttachmentLocker._refreshAttachmentInfoVisibility(window); } catch {}
+          return true;
+        } catch (e) { AttachmentLocker.log('tryPatchDetails error: ' + e); return false; }
+      };
+      // Attempt immediately and with a few retries (in case elements aren't ready yet)
+      if (!tryPatchDetails()) {
+        let attempts = 0;
+        const timer = () => {
+          attempts++;
+          if (tryPatchDetails() || attempts > 10) return;
+          window.setTimeout(timer, 200);
+        };
+        window.setTimeout(timer, 200);
       }
     } catch (e) { this.log('addToWindow error: ' + e); }
   },
@@ -279,4 +431,45 @@ AttachmentLocker = {
   removeFromWindow(window) {},
   addToAllWindows() { try { for (let win of Zotero.getMainWindows()) this.addToWindow(win); } catch {} },
   removeFromAllWindows() {},
+};
+
+// Helpers to control visibility of Attachment Info pane
+AttachmentLocker._refreshAttachmentInfoVisibility = function (win) {
+  try {
+    const zp = win?.ZoteroPane; if (!zp) return;
+    const items = zp.getSelectedItems();
+    const hasOne = items && items.length === 1 && items[0].isAttachment();
+    const isLocked = hasOne && AttachmentLocker.isLocked(items[0]);
+
+    const details = zp.itemPane?._itemDetails;
+    let pane = details?.getPane?.('attachment-info');
+    if (!pane) {
+      // Fallback by query
+      pane = win.document.querySelector('[data-pane="attachment-info"]');
+    }
+    if (!pane) return;
+
+    const sidenav = details?.sidenav;
+    if (isLocked) {
+      // Hide section and remove the sidenav button completely
+      pane.setAttribute('hidden', 'true');
+      pane.dataset.tuLockedHide = '1';
+      try { sidenav?.removePane?.('attachment-info'); } catch {}
+    } else {
+      if (pane.dataset.tuLockedHide === '1') {
+        pane.removeAttribute('hidden');
+        delete pane.dataset.tuLockedHide;
+      }
+      // Add sidenav button back if missing
+      try {
+        let btn = sidenav?.querySelector?.('.btn[data-pane="attachment-info"]');
+        if (!btn) {
+          let order = sidenav?.getPersistedOrder ? sidenav.getPersistedOrder() : null;
+          sidenav?.addPane?.('attachment-info', order);
+        }
+      } catch {}
+    }
+    // Update sidenav state
+    try { sidenav?.updatePaneStatus?.('attachment-info'); } catch {}
+  } catch (e) { AttachmentLocker.log('_refreshAttachmentInfoVisibility error: ' + e); }
 };

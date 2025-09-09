@@ -63,13 +63,13 @@ TranslatorUpdator = {
       const pane1 = await Zotero.PreferencePanes.register({
         pluginID: this.id,
         id: 'tu-prefpane-help-addtab',
-        label: 'افزودن تب',
+        label: '?????? ??',
         src: 'prefs/help_addtab.xhtml'
       });
       const pane2 = await Zotero.PreferencePanes.register({
         pluginID: this.id,
         id: 'tu-prefpane-help-clipboard',
-        label: 'انتقال فایل از ویندوز با کلید میانبر',
+        label: '?????? ???? ?? ?????? ?? ???? ??????',
         src: 'prefs/help_clipboard.xhtml'
       });
       this.helpPaneIDs = [pane1, pane2];
@@ -108,3 +108,4 @@ TranslatorUpdator = {
               #prefs-search-container, #prefs-help-container { display: none !important; }
             `;
             doc.documentElement.appendChild(style);
+

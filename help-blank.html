@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>راهنما و آموزش</title>
+  <title>راهنما و آموزش افزونه</title>
   <style>
     :root {
       --bg: #f7f7f9;
@@ -47,37 +47,108 @@
 </head>
 <body>
   <header>
-    <h1>راهنما و آموزش</h1>
+    <h1>راهنما و آموزش افزونه</h1>
   </header>
   <main>
     <div class="layout" id="layout">
-      <section class="content" id="content" aria-live="polite">
-        <!-- Add Tab -->
-        <article class="section" id="view-addtab" role="tabpanel" aria-labelledby="btn-addtab" data-view="addtab">
-          <h2>افزایش تب های زوترو</h2>
-          <p>با استفاده از این قابلیت امکان باز کردن چند صفحه زوترو به صورت همزمان ایجاد شده است.</p>
-          <p>با استفاده از دکمه افزودن صفحه در قسمت پلاگین، میتوان صفحه جدیدی در زوترو باز کرد.</p>
+            <section class="content" id="content" aria-live="polite">
+        <!-- Locker -->
+        <article class="section" id="view-locker" role="tabpanel" aria-labelledby="btn-locker" data-view="locker">
+          <h2>رمزگذاری فایل‌ها (Attachment Locker)</h2>
+          <p>
+            این قابلیت برای جلوگیری از مشاهده و دستکاری ناخواستهٔ پیوست‌ها در داخل زوترو طراحی شده است. با رمزگذاری یک فایل:
+          </p>
+          <ul>
+            <li>برای <strong>باز کردن در Reader</strong>، <strong>نمایش در پوشه</strong> و <strong>تغییر نام فایل</strong>، ابتدا باید رمز صحیح وارد شود.</li>
+            <li>بخش <strong>Attachment Info</strong> و آیکن آن در سایدبار هنگام قفل بودن پنهان می‌شوند.</li>
+          </ul>
+          <h3>چطور رمز بگذارم؟</h3>
+          <ul>
+            <li>روی یک پیوست (مثلاً PDF) راست‌کلیک کنید → «رمزگذاری».</li>
+            <li>رمز را وارد و سپس تکرار کنید. قانون رمز: هر ترکیبی از حروف/عدد/سمبل با طول <strong>۶ تا ۲۲</strong> کاراکتر مجاز است.</li>
+            <li>برای برداشتن رمز: روی همان فایل راست‌کلیک → «برداشتن رمز فایل» → رمز را وارد کنید.</li>
+          </ul>
+          <h3>نکات مهم</h3>
+          <ul>
+            <li>این قفل فقط دسترسی <strong>داخل زوترو</strong> را محدود می‌کند؛ فایل روی دیسک به‌صورت فیزیکی رمزنگاری نمی‌شود.</li>
+            <li>اگر گزینهٔ «رمزگذاری» را نمی‌بینید، مطمئن شوید دقیقاً یک پیوست انتخاب شده است و پس از نصب افزونه یکبار زوترو را ری‌استارت کنید.</li>
+          </ul>
+          <!-- New features appended below the existing tutorial -->
+          <hr/>
+          <h2>رمزگذاری فایل‌ها (Attachment Locker)</h2>
+          <p>
+            این قابلیت برای جلوگیری از مشاهده و دستکاری ناخواستهٔ پیوست‌ها در داخل زوترو طراحی شده است. با رمزگذاری یک فایل:
+          </p>
+          <ul>
+            <li>برای <strong>باز کردن در Reader</strong>، <strong>نمایش در پوشه</strong> و <strong>تغییر نام فایل</strong>، ابتدا باید رمز صحیح وارد شود.</li>
+            <li>بخش <strong>Attachment Info</strong> و آیکن آن در سایدبار هنگام قفل بودن پنهان می‌شوند.</li>
+          </ul>
+          <h3>چطور رمز بگذارم؟</h3>
+          <ul>
+            <li>روی یک پیوست (مثلاً PDF) راست‌کلیک کنید → «رمزگذاری».</li>
+            <li>رمز را وارد و سپس تکرار کنید. قانون رمز: هر ترکیبی از حروف/عدد/سمبل با طول <strong>۶ تا ۲۲</strong> کاراکتر مجاز است.</li>
+            <li>برای برداشتن رمز: روی همان فایل راست‌کلیک → «برداشتن رمز فایل» → رمز را وارد کنید.</li>
+          </ul>
+          <p class="muted">نکته: این قفل فقط دسترسی <strong>داخل زوترو</strong> را محدود می‌کند؛ فایل روی دیسک رمزنگاری نمی‌شود.</p>
+
+          <h2>اسکرول‌بار رنگی</h2>
+          <p>
+            برای خوانایی بهتر، رنگ و ضخامت اسکرول‌بارها در لیست‌ها و Reader کمی بهبود داده شده‌اند تا در تم روشن و نمایشگرهای مختلف واضح‌تر باشند.
+          </p>
+          <h3>تنظیم شدت</h3>
+          <p class="muted">
+            شدت پیش‌فرض ۱۰۰ است. در صورت تمایل می‌توانید مقدار <span class="kbd">extensions.base-plug.intensity</span> را در Config Editor تغییر دهید:
+          </p>
+          <ul>
+            <li>Preferences → Advanced → <em>Config Editor…</em>، کلید بالا را جست‌وجو کنید و مقدار ۰ تا ۱۰۰ بگذارید.</li>
+          </ul>
+
+          <h2>بهبودهای تم روشن (Light Theme)</h2>
+          <p>
+            برای جدایش بصری بهتر، خطوط جداکننده و پس‌زمینهٔ ردیف‌ها کمی پررنگ‌تر/زِبرا شده‌اند و مرزبندی بین پنل‌ها واضح‌تر است. این تغییرات فقط در تم روشن اعمال می‌شوند و تعادل طراحی اصلی را حفظ می‌کنند.
+          </p>
+          <ul>
+            <li>خوانایی و تمرکز روی ردیف‌ها و متادیتا بهتر می‌شود، مخصوصاً روی نمایشگرهای با کنتراست پایین.</li>
+            <li>مرزبندی بین پنل‌ها در کار طولانی‌مدت سبب کاهش خستگی چشم می‌شود.</li>
+          </ul>
         </article>
 
-        <!-- Clipboard Import -->
-        <article class="section" id="view-cutpaste" role="tabpanel" aria-labelledby="btn-cutpaste" data-view="cutpaste">
-          <h2>انتقال فایل از ویندوز با کلید میانبر</h2>
-          <p>با این قابلیت، امکان انتقال فایل ها از ویندوز به زوترو با استفاده از کلید های میانبر ویندوز فراهم شده است.</p>
-          <ul>
-            <li><span class="kbd">crtl</span> + <span class="kbd">V</span>: انتقال فایل انتخاب شده از ویندوز به محل مورد نظر در زوترو</li>
-            <li><span class="kbd">ctrl</span> + <span class="kbd">B</span>: عملکرد آن مانند <span class="kbd">ctrl</span> + <span class="kbd">z</span> است، یعنی فایل منتقل شده را به مبدا آن در ویندوز باز میگرداند.</li>
-          </ul>
+        <!-- Scrollbar Colorizer -->
+        <article class="section" id="view-scrollbar" role="tabpanel" aria-labelledby="btn-scrollbar" data-view="scrollbar">
+          <h2>اسکرول‌بار رنگی</h2>
           <p>
-            عملکرد این قابلیت دوگانه است؛ در قسمت انتقال از کلیپ برد در بخش پلاگین، میتوان یکی از این دو حالت را انتخاب کرد، حالت همیشه انتقال که حالتی مخصوص است، اگر در ویندوز فایلی کپی یا کات شود، هنگام پیست داخل زوترو فایل به زوترو انتقال داده شده و از ویندوز حذف میشود. حالت دوم که حالت عادی است، کپی و کات هرکدام به ترتیب فایل را داخل زوترو کپی کرده یا انتقال میدهند.
+            برای خوانایی بهتر، رنگ و ضخامت اسکرول‌بارها در لیست‌ها و Reader کمی بهبود داده شده‌اند تا در تم روشن و نمایشگرهای مختلف واضح‌تر باشند.
           </p>
+          <h3>تنظیم شدت</h3>
+          <p class="muted">
+            شدت پیش‌فرض ۱۰۰ است. در صورت تمایل می‌توانید مقدار <span class="kbd">extensions.base-plug.intensity</span> را در Config Editor تغییر دهید:
+          </p>
+          <ul>
+            <li>Preferences → Advanced → <em>Config Editor…</em>، کلید بالا را جست‌وجو کنید و مقدار ۰ تا ۱۰۰ بگذارید.</li>
+          </ul>
+        </article>
+
+        <!-- Light Theme Tweaks -->
+        <article class="section" id="view-theme" role="tabpanel" aria-labelledby="btn-theme" data-view="theme">
+          <h2>بهبودهای تم روشن (Light Theme)</h2>
+          <p>
+            برای جدایش بصری بهتر، خطوط جداکننده و پس‌زمینهٔ ردیف‌ها کمی پررنگ‌تر/زِبرا شده‌اند و مرزبندی بین پنجره‌ها (Pane Dividers) واضح‌تر است. این تغییرات فقط در تم روشن اعمال می‌شوند و تعادل طراحی اصلی را حفظ می‌کنند.
+          </p>
+          <h3>چرا این تغییرات؟</h3>
+          <ul>
+            <li>خوانایی و تمرکز روی ردیف‌ها و متادیتا بهتر می‌شود، مخصوصاً روی نمایشگرهای با کنتراست پایین.</li>
+            <li>مرزبندی بین پنل‌ها در کار طولانی‌مدت سبب کاهش خستگی چشم می‌شود.</li>
+          </ul>
+          <p class="muted">برای غیرفعال‌سازی کامل این بهبودها می‌توانید افزونه را موقتاً غیرفعال کنید.</p>
         </article>
       </section>
 
-      <aside class="sidebar" id="sidebar" role="tablist" aria-label="گزینه‌های آموزش">
-        <h2 class="muted">قابلیت‌ها</h2>
+            <aside class="sidebar" id="sidebar" role="tablist" aria-label="فهرست بخش‌ها">
+        <h2 class="muted">بخش‌ها</h2>
         <div class="side-list">
-          <button class="side-btn" id="btn-addtab" role="tab" aria-selected="false" data-target="addtab">افزودن تب</button>
-          <button class="side-btn" id="btn-cutpaste" role="tab" aria-selected="false" data-target="cutpaste">انتقال فایل از ویندوز با کلید میانبر</button>
+          <button class="side-btn" id="btn-locker" role="tab" aria-selected="false" data-target="locker">رمزگذاری فایل‌ها</button>
+          <button class="side-btn" id="btn-scrollbar" role="tab" aria-selected="false" data-target="scrollbar">اسکرول‌بار رنگی</button>
+          <button class="side-btn" id="btn-theme" role="tab" aria-selected="false" data-target="theme">بهبودهای تم روشن</button>
         </div>
       </aside>
     </div>
@@ -98,8 +169,8 @@
       }
 
       function applyFromHash(){
-        const hash = (location.hash || '#addtab').replace('#','');
-        const view = hash === 'cutpaste' ? 'cutpaste' : 'addtab';
+        const hash = (location.hash || '#locker').replace('#','');
+        const allow = ['locker','scrollbar','theme']; const view = allow.includes(hash) ? hash : 'locker';
         select(view);
       }
 
@@ -117,3 +188,6 @@
   </script>
 </body>
 </html>
+
+
+
