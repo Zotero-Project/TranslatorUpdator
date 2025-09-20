@@ -6,6 +6,7 @@ PluginAdmin = {
   rootURI: null,
   initialized: false,
   addedElementIDs: [],
+  
 
   init({ id, version, rootURI }) {
     if (this.initialized) return;
