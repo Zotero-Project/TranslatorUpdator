@@ -231,6 +231,8 @@ TranslatorUpdator = {
     return text || key;
   },
 
+  
+
   async runInsertTranslator() {
     let progressWin;
     try {
@@ -916,6 +918,8 @@ TranslatorUpdator = {
         clipMenu.appendChild(clipPopup);
         popup.appendChild(clipMenu);
 
+        // Settings submenu moved to PluginAdmin module
+
         // Separator before help item
         const sep = doc.createXULElement("menuseparator");
         popup.appendChild(sep);
@@ -935,6 +939,7 @@ TranslatorUpdator = {
         this.storeAddedElement(clipMenu);
         this.storeAddedElement(mode1);
         this.storeAddedElement(mode2);
+        // Settings submenu elements stored by PluginAdmin
         this.storeAddedElement(sep);
         this.storeAddedElement(helpItem);
       } catch (e) {

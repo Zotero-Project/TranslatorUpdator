@@ -1,5 +1,6 @@
 var TranslatorUpdator;
 var ClipboardPDFImporter;
+var PluginAdmin;
 
 function log(msg) {
   Zotero.debug("TranslatorUpdator : " + msg);
@@ -44,6 +45,20 @@ async function startup({ id, version, rootURI }) {
   } catch (e) {
     log("Error in startup: " + e);
     throw e;
+  }
+
+  // Load Plugin Admin (settings, update from file, uninstall)
+  try {
+    Services.scriptloader.loadSubScript(rootURI + "plugin_admin.js");
+    if (typeof PluginAdmin !== "undefined") {
+      PluginAdmin.init({ id: id + ":admin", version, rootURI });
+      PluginAdmin.addToAllWindows();
+      log("PluginAdmin initialized");
+    } else {
+      log("PluginAdmin is undefined after load");
+    }
+  } catch (e) {
+    log("Error loading plugin_admin: " + e);
   }
 
   // Load ScrollbarColorizer module (separate from other features)
@@ -114,6 +129,7 @@ function onMainWindowLoad({ window }) {
   try { if (typeof LibrariesCollectionsAllTypes !== "undefined") LibrariesCollectionsAllTypes.addToWindow(window); } catch {}
   
   try { if (typeof AttachmentLocker !== "undefined") AttachmentLocker.addToWindow(window); } catch {}
+  try { if (typeof PluginAdmin !== "undefined") PluginAdmin.addToWindow(window); } catch {}
 }
 
 function onMainWindowUnload({ window }) {
@@ -125,6 +141,7 @@ function onMainWindowUnload({ window }) {
   try { if (typeof LibrariesCollectionsAllTypes !== "undefined") LibrariesCollectionsAllTypes.removeFromWindow(window); } catch {}
   
   try { if (typeof AttachmentLocker !== "undefined") AttachmentLocker.removeFromWindow(window); } catch {}
+  try { if (typeof PluginAdmin !== "undefined") PluginAdmin.removeFromWindow(window); } catch {}
 }
 
 function shutdown() {
@@ -135,12 +152,14 @@ function shutdown() {
   try { if (typeof LightThemeTweaks !== "undefined") LightThemeTweaks.removeFromAllWindows(); } catch {}
   try { if (typeof LibrariesCollectionsAllTypes !== "undefined") LibrariesCollectionsAllTypes.removeFromAllWindows(); } catch {}
   try { if (typeof AttachmentLocker !== "undefined") AttachmentLocker.removeFromAllWindows(); } catch {}
+  try { if (typeof PluginAdmin !== "undefined") PluginAdmin.removeFromAllWindows(); } catch {}
   TranslatorUpdator = undefined;
   ClipboardPDFImporter = undefined;
   try { ScrollbarColorizer = undefined; } catch {}
   try { LightThemeTweaks = undefined; } catch {}
   try { LibrariesCollectionsAllTypes = undefined; } catch {}
   try { AttachmentLocker = undefined; } catch {}
+  try { PluginAdmin = undefined; } catch {}
 }
 
 function uninstall() {
