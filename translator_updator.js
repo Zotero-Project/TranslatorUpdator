@@ -358,7 +358,7 @@ TranslatorUpdator = {
       "progress.noMetadata": ({ file }) => this.localize(`⚠️ متادیتا برای ${file} یافت نشد`, `⚠️ No metadata for ${file}`),
       "progress.errorFetch": ({ file }) => this.localize(`❌ خطا در دانلود ${file}`, `❌ Failed to fetch ${file}`),
       "progress.completed": this.localize('✅ به‌روزرسانی با موفقیت تکمیل شد!', '✅ Update completed successfully!'),
-      "progress.available": this.localize('📚 مترجم‌ها آماده‌اند؛ در صورت نیاز صفحهٔ مرورگر را تازه کنید.', '📚 Translators are ready; refresh the browser page if needed.'),
+      "progress.available": this.localize('📚 مترجم‌ها بعد از 10 دقیقه در دسترس خواهند بود', '📚 Translators will be available after 10 minutes'),
       "progress.error": ({ file }) => this.localize(`❌ خطا: ${file}`, `❌ Error: ${file}`),
       "button.close": this.localize('برای بستن کلیک کنید...', 'Click to close...'),
     };
@@ -473,24 +473,6 @@ TranslatorUpdator = {
     }
   },
 
-  async refreshTranslatorCaches() {
-    try {
-      await Zotero.Translators.reinit({ reinit: true });
-      this.log('Translators cache reinitialized');
-    } catch (e) {
-      try { this.log('Error reinitializing translators: ' + e); } catch {}
-    }
-    try {
-      await Zotero.HTTP.request('POST', 'http://127.0.0.1:23119/connector/ping', {
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ translatorsUpdated: true })
-      });
-      this.log('Connector ping dispatched');
-    } catch (e) {
-      try { this.log('Connector ping failed: ' + e); } catch {}
-    }
-  },
-
   async runInsertTranslator() {
     let progressWin;
     try {
@@ -600,8 +582,6 @@ TranslatorUpdator = {
           this.log(`No metadata found in ${file.name}`);
         }
       }
-
-      await this.refreshTranslatorCaches();
 
       progressItem.setText(this.getLocalizedString("progress.completed"));
       progressItem.setProgress(100);
