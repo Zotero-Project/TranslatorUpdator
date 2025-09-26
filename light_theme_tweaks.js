@@ -22,6 +22,42 @@ LightThemeTweaks = {
       const style = doc.createElementNS('http://www.w3.org/1999/xhtml', 'style');
       style.id = this._styleId;
       style.textContent = `
+        /* Libraries & Collections: match current collection highlight with tree selection */
+        .zotero-editpane-libraries-collections .body .box.current {
+          background-color: var(--color-accent) !important;
+          color: var(--color-accent-text) !important;
+        }
+        .zotero-editpane-libraries-collections .body .box.current:hover,
+        .zotero-editpane-libraries-collections .body .box.current:active {
+          background-color: var(--color-accent) !important;
+          color: var(--color-accent-text) !important;
+        }
+        .zotero-editpane-libraries-collections .body .box.current .icon {
+          color: inherit;
+          fill: currentColor;
+        }
+        #zotero-collections-tree .virtualized-table .row.highlighted:not(.selected) {
+          background-color: var(--color-accent) !important;
+          color: var(--color-accent-text) !important;
+        }
+        #zotero-collections-tree .virtualized-table .row.highlighted:not(.selected) .icon,
+        #zotero-collections-tree .virtualized-table .row.highlighted:not(.selected) .icon-css,
+        #zotero-collections-tree .virtualized-table .row.highlighted:not(.selected) .cell,
+        #zotero-collections-tree .virtualized-table .row.highlighted:not(.selected) .cell-text {
+          color: inherit !important;
+          fill: currentColor;
+        }
+        #zotero-collections-tree .virtualized-table:not(:focus-within) .row.selected {
+          background-color: var(--color-accent) !important;
+          color: var(--color-accent-text) !important;
+        }
+        #zotero-collections-tree .virtualized-table:not(:focus-within) .row.selected .icon,
+        #zotero-collections-tree .virtualized-table:not(:focus-within) .row.selected .icon-css,
+        #zotero-collections-tree .virtualized-table:not(:focus-within) .row.selected .cell,
+        #zotero-collections-tree .virtualized-table:not(:focus-within) .row.selected .cell-text {
+          color: inherit !important;
+          fill: currentColor;
+        }
         /* Increase separation and contrast in light theme without breaking design */
         @media (prefers-color-scheme: light) {
           /* Global: nudge divider/separator variables a bit darker */

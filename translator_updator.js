@@ -61,19 +61,55 @@ TranslatorUpdator = {
   async registerHelpPanes() {
     try {
       if (this.helpPaneIDs && this.helpPaneIDs.length) return;
+      const paneTranslators = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-translators',
+        label: this.localize('راهنمای مترجم‌ها', 'Translator Guide'),
+        src: 'prefs/help_translators.xhtml'
+      });
       const pane1 = await Zotero.PreferencePanes.register({
         pluginID: this.id,
         id: 'tu-prefpane-help-addtab',
-        label: 'افزودن تب',
+        label: this.localize('افزودن تب', 'Add Extra Tabs'),
         src: 'prefs/help_addtab.xhtml'
       });
       const pane2 = await Zotero.PreferencePanes.register({
         pluginID: this.id,
         id: 'tu-prefpane-help-clipboard',
-        label: 'انتقال فایل از ویندوز با کلید میانبر',
+        label: this.localize('انتقال فایل از ویندوز با کلید میانبر', 'Clipboard Import Shortcuts'),
         src: 'prefs/help_clipboard.xhtml'
       });
-      this.helpPaneIDs = [pane1, pane2];
+      const pane3 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-collections-highlight',
+        label: this.localize('نمایش پوشه در درخت', 'Highlight Collection in Tree'),
+        src: 'prefs/help_collections_highlight.xhtml'
+      });
+      const pane4 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-zoom',
+        label: this.localize('بزرگ‌نمایی رابط کاربری', 'UI Zoom Controls'),
+        src: 'prefs/help_zoom.xhtml'
+      });
+      const pane5 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-plugin-settings',
+        label: this.localize('تنظیمات و پشتیبانی افزونه', 'Plugin Settings & Support'),
+        src: 'prefs/help_plugin_settings.xhtml'
+      });
+      const pane6 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-context-actions',
+        label: this.localize('میانبرهای راست‌کلیک', 'Context Menu Actions'),
+        src: 'prefs/help_context_actions.xhtml'
+      });
+      const pane7 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-encryption',
+        label: this.localize('راهنمای رمزگذاری فایل', 'Attachment Encryption Guide'),
+        src: 'prefs/help_encryption.xhtml'
+      });
+      this.helpPaneIDs = [paneTranslators, pane1, pane2, pane3, pane4, pane5, pane6, pane7];
       this.log('Registered help preference panes: ' + JSON.stringify(this.helpPaneIDs));
     } catch (e) {
       this.log('Error registering help panes: ' + e);
@@ -96,6 +132,25 @@ TranslatorUpdator = {
         try {
           const doc = win && win.document;
           if (!doc) return false;
+
+          const isFa = this.isPersianLocale();
+          if (doc.documentElement && doc.documentElement.classList) {
+            doc.documentElement.classList.toggle('tu-locale-fa', !!isFa);
+            doc.documentElement.classList.toggle('tu-locale-en', !isFa);
+          }
+
+          const toggleLocaleBlocks = () => {
+            try {
+              const showSelector = isFa ? '.tu-lang-fa' : '.tu-lang-en';
+              const hideSelector = isFa ? '.tu-lang-en' : '.tu-lang-fa';
+              doc.querySelectorAll(hideSelector).forEach((el) => el.setAttribute('hidden', 'true'));
+              doc.querySelectorAll(showSelector).forEach((el) => el.removeAttribute('hidden'));
+            } catch (err) {
+              try { this.log('toggleLocaleBlocks error: ' + err); } catch {}
+            }
+          };
+          toggleLocaleBlocks();
+
           const nav = doc.getElementById('prefs-navigation');
           const content = doc.getElementById('prefs-content');
           if (!nav || !content) return false;
@@ -147,9 +202,11 @@ TranslatorUpdator = {
             }
           }
 
+          toggleLocaleBlocks();
           return true;
         } catch (e) {
           try { this.log('Error applying help-only tweaks: ' + e); } catch {}
+          toggleLocaleBlocks();
           return false;
         }
       };
@@ -173,6 +230,93 @@ TranslatorUpdator = {
     Zotero.debug("TranslatorUpdator: " + msg);
   },
 
+  UI_FONT_PREF: "fontSize",
+  UI_FONT_STEPS: [
+    "0.77",
+    "0.85",
+    "0.92",
+    "1.00",
+    "1.08",
+    "1.15",
+    "1.23",
+    "1.38",
+    "1.54",
+    "1.85",
+  ],
+  UI_FONT_DEFAULT: "1.00",
+
+  adjustUIScale(direction) {
+    try {
+      if (!Zotero || !Zotero.Prefs) {
+        throw new Error("Zotero.Prefs unavailable");
+      }
+      const steps = this.UI_FONT_STEPS;
+      const pref = this.UI_FONT_PREF;
+      const defaultValue = this.UI_FONT_DEFAULT;
+      const epsilon = 0.001;
+
+      if (direction === "reset") {
+        Zotero.Prefs.clear(pref);
+      } else {
+        let current = Zotero.Prefs.get(pref);
+        if (!current) {
+          current = defaultValue;
+        }
+        const currentNum = parseFloat(current);
+        const safeCurrent = Number.isFinite(currentNum)
+          ? currentNum
+          : parseFloat(defaultValue);
+
+        let nextStep;
+        if (direction === "up") {
+          nextStep = steps[steps.length - 1];
+          for (const step of steps) {
+            const stepNum = parseFloat(step);
+            if (stepNum - safeCurrent > epsilon) {
+              nextStep = step;
+              break;
+            }
+          }
+        } else if (direction === "down") {
+          nextStep = steps[0];
+          for (let i = steps.length - 1; i >= 0; i--) {
+            const stepNum = parseFloat(steps[i]);
+            if (safeCurrent - stepNum > epsilon) {
+              nextStep = steps[i];
+              break;
+            }
+          }
+        } else {
+          throw new Error("Unknown direction: " + direction);
+        }
+
+        if (Math.abs(parseFloat(nextStep) - safeCurrent) < epsilon) {
+          return;
+        }
+
+        Zotero.Prefs.set(pref, String(nextStep));
+      }
+
+      if (Zotero.UIProperties && typeof Zotero.UIProperties.setAll === "function") {
+        Zotero.UIProperties.setAll();
+      }
+    } catch (e) {
+      try { this.log("adjustUIScale error: " + e); } catch {}
+    }
+  },
+
+  increaseUIScale() {
+    this.adjustUIScale("up");
+  },
+
+  decreaseUIScale() {
+    this.adjustUIScale("down");
+  },
+
+  resetUIScale() {
+    this.adjustUIScale("reset");
+  },
+
   // اعتبارسنجی و اصلاح متون فارسی
   sanitizePersianText(text) {
     try {
@@ -188,47 +332,163 @@ TranslatorUpdator = {
     }
   },
 
+  isPersianLocale() {
+    try {
+      const locale = Zotero.locale || "en-US";
+      return String(locale).toLowerCase().startsWith("fa");
+    } catch (e) {
+      try { this.log("isPersianLocale error: " + e); } catch {}
+      return false;
+    }
+  },
+
+  localize(faText, enText) {
+    return this.isPersianLocale() ? faText : (enText !== undefined ? enText : faText);
+  },
+
+
+
   getLocalizedString(key, params = {}) {
-    const locale = Zotero.locale || "en-US";
-    const isPersian = locale.startsWith("fa");
     const strings = {
-      "menu.label": isPersian ? "به‌روزرسانی مترجم‌ها" : "Update Translators",
-      "progress.start": isPersian
-        ? "🚀 شروع به‌روزرسانی..."
-        : "🚀 Starting update...",
-      "progress.fetching": isPersian
-        ? "دریافت لیست فایل‌ها..."
-        : "Fetching file list...",
-      "progress.downloading": isPersian
-        ? (file) => `📥 دانلود ${file}...`
-        : (file) => `📥 Downloading ${file}...`,
-      "progress.saving": isPersian
-        ? (file) => `💾 ذخیره ${file}...`
-        : (file) => `💾 Saving ${file}...`,
-      "progress.noMetadata": isPersian
-        ? (file) => `⚠️ متادیتا برای ${file} یافت نشد`
-        : (file) => `⚠️ No metadata for ${file}`,
-      "progress.errorFetch": isPersian
-        ? (file) => `❌ خطا در دانلود ${file}`
-        : (file) => `❌ Failed to fetch ${file}`,
-      "progress.completed": isPersian
-        ? "✅ به‌روزرسانی با موفقیت تکمیل شد!"
-        : "✅ Update completed successfully!",
-      "progress.available": isPersian
-        ? "📚 مترجم‌ها بعد از 10 دقیقه در دسترس خواهند بود"
-        : "📚 Translators will be available after 10 minutes",
-      "progress.error": isPersian
-        ? (err) => `❌ خطا: ${err}`
-        : (err) => `❌ Error: ${err}`,
-      "button.close": isPersian
-        ? "برای بستن کلیک کنید..."
-        : "Click to close...",
+      "menu.label": this.localize('به‌روزرسانی مترجم‌ها', 'Update Translators'),
+      "progress.start": this.localize('🚀 شروع به‌روزرسانی...', '🚀 Starting update...'),
+      "progress.fetching": this.localize('دریافت لیست فایل‌ها...', 'Fetching file list...'),
+      "progress.downloading": ({ file }) => this.localize(`📥 دانلود ${file}...`, `📥 Downloading ${file}...`),
+      "progress.saving": ({ file }) => this.localize(`💾 ذخیره ${file}...`, `💾 Saving ${file}...`),
+      "progress.noMetadata": ({ file }) => this.localize(`⚠️ متادیتا برای ${file} یافت نشد`, `⚠️ No metadata for ${file}`),
+      "progress.errorFetch": ({ file }) => this.localize(`❌ خطا در دانلود ${file}`, `❌ Failed to fetch ${file}`),
+      "progress.completed": this.localize('✅ به‌روزرسانی با موفقیت تکمیل شد!', '✅ Update completed successfully!'),
+      "progress.available": this.localize('📚 مترجم‌ها آماده‌اند؛ در صورت نیاز صفحهٔ مرورگر را تازه کنید.', '📚 Translators are ready; refresh the browser page if needed.'),
+      "progress.error": ({ file }) => this.localize(`❌ خطا: ${file}`, `❌ Error: ${file}`),
+      "button.close": this.localize('برای بستن کلیک کنید...', 'Click to close...'),
     };
-    const text =
-      typeof strings[key] === "function"
-        ? strings[key](params.file)
-        : strings[key];
-    return text || key;
+
+    const value = strings[key];
+    if (typeof value === 'function') {
+      try {
+        return value(params || {});
+      } catch (err) {
+        try { this.log('getLocalizedString handler error: ' + err); } catch {}
+        return key;
+      }
+    }
+
+    return value || key;
+  },
+
+  // Ask user to confirm an action (simple yes/no)
+  _confirm(window, title, text) {
+    try {
+      return Services.prompt.confirm(window || null, title, text);
+    } catch (e) {
+      try { this.log('Confirm error: ' + e); } catch {}
+      return false;
+    }
+  },
+
+  // Update/install a plugin from a local file (XPI/ZIP) after confirmation
+  async updatePluginFromFile(window) {
+    try {
+      const title = this.localize('تایید', 'Confirm');
+      const text = this.localize('آیا می‌خواهید فایل افزونه را انتخاب کرده و نصب/بروزرسانی کنید؟', 'Are you sure you want to install/update the plugin from a file?');
+      if (!this._confirm(window, title, text)) return;
+
+      const { FilePicker } = ChromeUtils.importESModule('chrome://zotero/content/modules/filePicker.mjs');
+      const fp = new FilePicker();
+      fp.init(window, this.localize('انتخاب فایل افزونه', 'Choose Plugin File'), fp.modeOpen);
+      // Common plugin package formats
+      try { fp.appendFilter('Zotero Plugin (*.xpi, *.zip)', '*.xpi; *.zip'); } catch {}
+      try { fp.appendFilters(fp.filterAll); } catch {}
+      const rv = await fp.show();
+      if (rv !== fp.returnOK) return;
+
+      const path = fp.file; // string path
+      const { FileUtils } = ChromeUtils.importESModule('resource://gre/modules/FileUtils.sys.mjs');
+      const nsFile = new FileUtils.File(path);
+      const fileURL = Services.io.newFileURI(nsFile).spec;
+
+      const { AddonManager } = ChromeUtils.importESModule('resource://gre/modules/AddonManager.sys.mjs');
+      let install = null;
+      try {
+        if (AddonManager && typeof AddonManager.createInstall === 'function') {
+          install = await AddonManager.createInstall({ url: fileURL });
+        }
+      } catch {}
+
+      // Fallbacks for platforms where createInstall() isn't available
+      if (!install) {
+        try {
+          if (AddonManager && typeof AddonManager.getInstallForFile === 'function') {
+            install = await AddonManager.getInstallForFile(nsFile);
+          }
+        } catch {}
+      }
+      if (!install) {
+        try {
+          if (AddonManager && typeof AddonManager.getInstallForURL === 'function') {
+            const maybe = AddonManager.getInstallForURL(fileURL, null, 'application/x-xpinstall');
+            install = (maybe && typeof maybe.then === 'function') ? await maybe : maybe;
+          }
+        } catch {}
+      }
+
+      if (!install || typeof install.install !== 'function') {
+        throw new Error('No suitable AddonManager installer method available');
+      }
+      await install.install();
+
+      try {
+        Services.prompt.alert(window || null, this.localize('نصب/بروزرسانی افزونه', 'Install/Update Plugin'), this.localize('عملیات با موفقیت انجام شد.', 'Installation/Update completed.'));
+      } catch {}
+    } catch (e) {
+      try {
+        this.log('Error in updatePluginFromFile: ' + e);
+        Services.prompt.alert(window || null, this.localize('خطا', 'Error'), `${this.localize('امکان نصب/بروزرسانی وجود ندارد.', 'Could not install/update.')}\n${e}`);
+      } catch {}
+    }
+  },
+
+  // Uninstall this plugin after confirmation
+  async uninstallThisPlugin(window) {
+    try {
+      const title = this.localize('حذف پلاگین', 'Remove Plugin');
+      const text = this.localize('آیا مطمئن هستید که می‌خواهید این پلاگین و متعلقات آن را حذف کنید؟', 'Are you sure you want to uninstall this plugin?');
+      if (!this._confirm(window, title, text)) return;
+
+      const { AddonManager } = ChromeUtils.importESModule('resource://gre/modules/AddonManager.sys.mjs');
+      const addon = await AddonManager.getAddonByID(this.id);
+      if (!addon) {
+        try { Services.prompt.alert(window || null, this.localize('حذف پلاگین', 'Remove Plugin'), this.localize('افزونه یافت نشد.', 'Addon not found.')); } catch {}
+        return;
+      }
+      await addon.uninstall();
+      try {
+        Services.prompt.alert(window || null, this.localize('حذف پلاگین', 'Remove Plugin'), this.localize('افزونه حذف شد.', 'The plugin has been uninstalled.'));
+      } catch {}
+    } catch (e) {
+      try {
+        this.log('Error in uninstallThisPlugin: ' + e);
+        Services.prompt.alert(window || null, this.localize('خطا', 'Error'), `${this.localize('امکان حذف وجود ندارد.', 'Could not uninstall.')}\n${e}`);
+      } catch {}
+    }
+  },
+
+  async refreshTranslatorCaches() {
+    try {
+      await Zotero.Translators.reinit({ reinit: true });
+      this.log('Translators cache reinitialized');
+    } catch (e) {
+      try { this.log('Error reinitializing translators: ' + e); } catch {}
+    }
+    try {
+      await Zotero.HTTP.request('POST', 'http://127.0.0.1:23119/connector/ping', {
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ translatorsUpdated: true })
+      });
+      this.log('Connector ping dispatched');
+    } catch (e) {
+      try { this.log('Connector ping failed: ' + e); } catch {}
+    }
   },
 
   async runInsertTranslator() {
@@ -341,6 +601,8 @@ TranslatorUpdator = {
         }
       }
 
+      await this.refreshTranslatorCaches();
+
       progressItem.setText(this.getLocalizedString("progress.completed"));
       progressItem.setProgress(100);
       progressWin.addDescription(
@@ -406,27 +668,44 @@ TranslatorUpdator = {
   addToWindow(window) {
     try {
       let doc = window.document;
-      let item = doc.createXULElement("menuitem");
-      item.id = "update-translators-btn";
-      item.setAttribute("label", this.getLocalizedString("menu.label"));
-      item.addEventListener("command", () => {
-        this.log("Update Translators menu item clicked");
-        this.runInsertTranslator();
-      });
-      let menuPopup = doc.getElementById("menu_viewPopup");
-      if (!menuPopup) {
-        this.log("menu_viewPopup not found");
-        return;
+      // ?????: ???? ???? ?????? �??????�
+      this.addTopPluginMenu(window);
+
+      if (doc.getElementById("update-translators-btn")) {
+        this.log("Update Translators menu item already exists; skipping");
+      } else {
+        const pluginMenu = doc.getElementById("tu-plugin-menu");
+        const menuPopup =
+          pluginMenu && (pluginMenu.menupopup || pluginMenu.querySelector("menupopup"));
+
+        if (!menuPopup) {
+          this.log("Plugin menu popup not found");
+        } else {
+          let item = doc.createXULElement("menuitem");
+          item.id = "update-translators-btn";
+          item.setAttribute("label", this.getLocalizedString("menu.label"));
+          item.addEventListener("command", () => {
+            this.log("Update Translators menu item clicked");
+            this.runInsertTranslator();
+          });
+
+          const newWindowItem = menuPopup.querySelector("#tu-plugin-menu-new-window");
+          if (newWindowItem && newWindowItem.parentNode === menuPopup) {
+            if (newWindowItem.nextSibling) {
+              menuPopup.insertBefore(item, newWindowItem.nextSibling);
+            } else {
+              menuPopup.appendChild(item);
+            }
+          } else if (menuPopup.firstChild) {
+            menuPopup.insertBefore(item, menuPopup.firstChild);
+          } else {
+            menuPopup.appendChild(item);
+          }
+
+          this.storeAddedElement(item);
+          this.log("Menu item added to plugin menu");
+        }
       }
-      menuPopup.appendChild(item);
-      this.storeAddedElement(item);
-      this.log("Menu item added to window");
-  
-
-
-      // اضافه: ساخت منوی بالایی «پلاگین»
-      this.addTopPluginMenu(window);  
-
       // Ensure item context menu remains functional
       this.installContextMenuRescue(window);
 
@@ -508,13 +787,14 @@ TranslatorUpdator = {
       if (!menu || menu._tu_patched) return;
       menu._tu_patched = true;
 
-      const isFa = (Zotero.locale || '').startsWith('fa');
-
       const labels = {
-        viewInTab: isFa ? 'نمایش در تب جدید' : 'Open in New Tab',
-        viewInWindow: isFa ? 'نمایش در پنجره جدید' : 'Open in New Window',
-        viewPDFInNewTab: isFa ? 'خواندن در صفحه جدید' : 'Open PDF in New Tab',
-        showFile: isFa ? 'نمایش فایل در پوشه' : 'Show File in Folder',
+        viewInTab: this.localize('نمایش در تب جدید', 'Open in New Tab'),
+        viewInWindow: this.localize('نمایش در پنجره جدید', 'Open in New Window'),
+        viewPDFInNewTab: this.localize('خواندن در صفحه جدید', 'Open PDF in New Tab'),
+        showFile: this.localize('نمایش فایل در پوشه', 'Show File in Folder'),
+        viewOnline: this.localize('نمایش نسخه برخط', 'View Online'),
+        viewExternal: this.localize('باز کردن با برنامه دیگر', 'Open in External Viewer'),
+        addToCollection: this.localize('افزودن به مجموعه', 'Add to Collection'),
       };
 
       const ensureLabels = () => {
@@ -551,10 +831,10 @@ TranslatorUpdator = {
             }
           }
           fix('.zotero-menuitem-show-file', labels.showFile);
-          fix('.zotero-menuitem-view-online', isFa ? 'نمایش نسخه برخط' : 'View Online');
-          fix('.zotero-menuitem-view-external', isFa ? 'باز کردن با برنامه دیگر' : 'Open in External Viewer');
+          fix('.zotero-menuitem-view-online', labels.viewOnline);
+          fix('.zotero-menuitem-view-external', labels.viewExternal);
           // Submenu label sometimes missing
-          fix('.zotero-menuitem-add-to-collection', isFa ? 'افزودن به مجموعه' : 'Add to Collection');
+          fix('.zotero-menuitem-add-to-collection', labels.addToCollection);
         } catch {}
       };
 
@@ -640,11 +920,10 @@ TranslatorUpdator = {
       if (!menu || menu._tu_patched) return;
       menu._tu_patched = true;
 
-      const isFa = (Zotero.locale || '').startsWith('fa');
       const labels = {
-        rename: isFa ? 'تغییر نام مجموعه…' : 'Rename Collection…',
-        move: isFa ? 'جابجایی مجموعه…' : 'Move Collection…',
-        copy: isFa ? 'کپی از مجموعه…' : 'Copy Collection…',
+        rename: this.localize('تغییر نام مجموعه…', 'Rename Collection…'),
+        move: this.localize('جابجایی مجموعه…', 'Move Collection…'),
+        copy: this.localize('کپی از مجموعه…', 'Copy Collection…'),
       };
 
       const ensureLabels = async () => {
@@ -701,7 +980,7 @@ TranslatorUpdator = {
       // ساخت منوی بالایی «پلاگین»
       const menu = doc.createXULElement("menu");
       menu.id = "tu-plugin-menu";
-      menu.setAttribute("label", "پلاگین");
+      menu.setAttribute("label", this.localize("پلاگین", "Plugin"));
 
       const popup = doc.createXULElement("menupopup");
       menu.appendChild(popup);
@@ -816,20 +1095,20 @@ TranslatorUpdator = {
 
         const menu = doc.createXULElement("menu");
         menu.id = "tu-plugin-menu";
-        menu.setAttribute("label", "پلاگین");
+        menu.setAttribute("label", this.localize("پلاگین", "Plugin"));
 
         const popup = doc.createXULElement("menupopup");
 
         const newWinItem = doc.createXULElement("menuitem");
         newWinItem.id = "tu-plugin-menu-new-window";
-        newWinItem.setAttribute("label", "افزودن صفحه");
+        newWinItem.setAttribute("label", this.localize("افزودن صفحه", "Open New Window"));
         newWinItem.addEventListener("command", () => this.openNewMainWindow(window));
         popup.appendChild(newWinItem);
 
         // Help/Tutorial page
         const helpItem = doc.createXULElement("menuitem");
         helpItem.id = "tu-plugin-menu-help";
-        helpItem.setAttribute("label", "آموزش پلاگین");
+        helpItem.setAttribute("label", this.localize("آموزش پلاگین", "Plugin Tutorial"));
         helpItem.addEventListener("command", () => this.openTutorialWindow(window));
         popup.appendChild(helpItem);
 
@@ -862,20 +1141,88 @@ TranslatorUpdator = {
 
         const menu = doc.createXULElement("menu");
         menu.id = "tu-plugin-menu";
-        menu.setAttribute("label", "پلاگین");
+        menu.setAttribute("label", this.localize("پلاگین", "Plugin"));
 
         const popup = doc.createXULElement("menupopup");
 
         const newWinItem = doc.createXULElement("menuitem");
         newWinItem.id = "tu-plugin-menu-new-window";
-        newWinItem.setAttribute("label", "افزودن صفحه");
+        newWinItem.setAttribute("label", this.localize("افزودن صفحه", "Open New Window"));
         newWinItem.addEventListener("command", () => this.openNewMainWindow(window));
         popup.appendChild(newWinItem);
+
+        const zoomMenu = doc.createXULElement("menu");
+        zoomMenu.id = "tu-zoom-menu";
+        zoomMenu.setAttribute("label", this.localize("بزرگ‌نمایی", "Zoom"));
+
+        const zoomPopup = doc.createXULElement("menupopup");
+
+        const zoomInItem = doc.createXULElement("menuitem");
+        zoomInItem.id = "tu-zoom-increase";
+        zoomInItem.setAttribute("label", this.localize("بزرگ‌نمایی (+)", "Zoom In (+)"));
+        zoomInItem.setAttribute("closemenu", "none");
+        zoomPopup.appendChild(zoomInItem);
+
+        const zoomOutItem = doc.createXULElement("menuitem");
+        zoomOutItem.id = "tu-zoom-decrease";
+        zoomOutItem.setAttribute("label", this.localize("کوچک‌نمایی (-)", "Zoom Out (-)"));
+        zoomOutItem.setAttribute("closemenu", "none");
+        zoomPopup.appendChild(zoomOutItem);
+
+        const zoomResetItem = doc.createXULElement("menuitem");
+        zoomResetItem.id = "tu-zoom-reset";
+        zoomResetItem.setAttribute("label", this.localize("حالت پیش‌فرض (0)", "Reset Zoom (0)"));
+        zoomResetItem.setAttribute("closemenu", "none");
+        zoomPopup.appendChild(zoomResetItem);
+
+        zoomPopup.addEventListener("command", (event) => {
+          try {
+            const target = event.target || event.originalTarget;
+            if (!target || !target.id) {
+              return;
+            }
+            const id = target.id;
+            if (id === "tu-zoom-increase") {
+              this.increaseUIScale();
+            } else if (id === "tu-zoom-decrease") {
+              this.decreaseUIScale();
+            } else if (id === "tu-zoom-reset") {
+              this.resetUIScale();
+            } else {
+              return;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            window.setTimeout(() => {
+              try {
+                const parentPopup = menu.menupopup || menu.querySelector("menupopup");
+                if (parentPopup && parentPopup.state !== "open" && typeof parentPopup.openPopup === "function") {
+                  menu.open = true;
+                  menu.setAttribute("open", "true");
+                  parentPopup.openPopup(menu, "after_start", 0, 0, true, false);
+                }
+                const subPopup = zoomMenu.menupopup || zoomPopup;
+                if (subPopup && subPopup.state !== "open" && typeof subPopup.openPopup === "function") {
+                  zoomMenu.open = true;
+                  zoomMenu.setAttribute("open", "true");
+                  subPopup.openPopup(zoomMenu, "after_start", 0, 0, true, false);
+                }
+              } catch (err2) {
+                try { this.log("Zoom menu reopen error: " + err2); } catch {}
+              }
+            }, 0);
+          } catch (err) {
+            try { this.log("Zoom menu command error: " + err); } catch {}
+          }
+        });
+
+        zoomMenu.appendChild(zoomPopup);
+        popup.appendChild(zoomMenu);
 
         // Clipboard Mode submenu
         const clipMenu = doc.createXULElement("menu");
         clipMenu.id = "tu-clipboard-mode-menu";
-        clipMenu.setAttribute("label", "انتقال از کلیپ‌برد");
+        clipMenu.setAttribute("label", this.localize("انتقال از کلیپ‌برد", "Clipboard Mode"));
 
         const clipPopup = doc.createXULElement("menupopup");
 
@@ -883,13 +1230,13 @@ TranslatorUpdator = {
         mode1.id = "tu-clipboard-mode-force";
         mode1.setAttribute("type", "radio");
         mode1.setAttribute("name", "tu-clipboard-mode-group");
-        mode1.setAttribute("label", "همیشه انتقال (حالت مخصوص)");
+        mode1.setAttribute("label", this.localize("همیشه انتقال (حالت مخصوص)", "Always Import (Force Mode)"));
 
         const mode2 = doc.createXULElement("menuitem");
         mode2.id = "tu-clipboard-mode-respect";
         mode2.setAttribute("type", "radio");
         mode2.setAttribute("name", "tu-clipboard-mode-group");
-        mode2.setAttribute("label", "تشخیص کات/کپی (حالت عادی)");
+        mode2.setAttribute("label", this.localize("تشخیص کات/کپی (حالت عادی)", "Respect Clipboard (Default Mode)"));
 
         // Set initial state from pref
         let modePref = "force";
@@ -916,6 +1263,28 @@ TranslatorUpdator = {
         clipMenu.appendChild(clipPopup);
         popup.appendChild(clipMenu);
 
+        // Plugin Settings submenu
+        const settingsMenu = doc.createXULElement('menu');
+        settingsMenu.id = 'tu-plugin-settings-menu';
+        settingsMenu.setAttribute('label', this.localize('تنظیمات پلاگین', 'Plugin Settings'));
+
+        const settingsPopup = doc.createXULElement('menupopup');
+
+        const updateFromFileItem = doc.createXULElement('menuitem');
+        updateFromFileItem.id = 'tu-plugin-update-from-file';
+        updateFromFileItem.setAttribute('label', this.localize('آپدیت پلاگین با فایل', 'Update Plugin from File'));
+        updateFromFileItem.addEventListener('command', () => this.updatePluginFromFile(window));
+
+        const removePluginItem = doc.createXULElement('menuitem');
+        removePluginItem.id = 'tu-plugin-remove-self';
+        removePluginItem.setAttribute('label', this.localize('حذف پلاگین', 'Remove Plugin'));
+        removePluginItem.addEventListener('command', () => this.uninstallThisPlugin(window));
+
+        settingsPopup.appendChild(updateFromFileItem);
+        settingsPopup.appendChild(removePluginItem);
+        settingsMenu.appendChild(settingsPopup);
+        popup.appendChild(settingsMenu);
+
         // Separator before help item
         const sep = doc.createXULElement("menuseparator");
         popup.appendChild(sep);
@@ -923,7 +1292,7 @@ TranslatorUpdator = {
         // Help/Training entry opens Preferences with plugin panes
         const helpItem = doc.createXULElement("menuitem");
         helpItem.id = "tu-plugin-menu-help";
-        helpItem.setAttribute("label", "راهنما و آموزش...");
+        helpItem.setAttribute("label", this.localize("راهنما و آموزش...", "Help & Training..."));
         helpItem.addEventListener("command", () => this.openHelpPreferences());
         popup.appendChild(helpItem);
 
@@ -932,9 +1301,16 @@ TranslatorUpdator = {
 
         this.storeAddedElement(menu);
         this.storeAddedElement(newWinItem);
+        this.storeAddedElement(zoomMenu);
+        this.storeAddedElement(zoomInItem);
+        this.storeAddedElement(zoomOutItem);
+        this.storeAddedElement(zoomResetItem);
         this.storeAddedElement(clipMenu);
         this.storeAddedElement(mode1);
         this.storeAddedElement(mode2);
+        this.storeAddedElement(settingsMenu);
+        this.storeAddedElement(updateFromFileItem);
+        this.storeAddedElement(removePluginItem);
         this.storeAddedElement(sep);
         this.storeAddedElement(helpItem);
       } catch (e) {
@@ -945,3 +1321,4 @@ TranslatorUpdator = {
     try { Zotero.debug("TranslatorUpdator override init error: " + e); } catch {}
   }
 })(); 
+

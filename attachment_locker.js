@@ -18,6 +18,19 @@ AttachmentLocker = {
 
   log(msg) { try { Zotero.debug('AttachmentLocker: ' + msg); } catch {} },
 
+  isPersianLocale() {
+    try {
+      const locale = Zotero.locale || 'en-US';
+      return String(locale).toLowerCase().startsWith('fa');
+    } catch (e) {
+      return false;
+    }
+  },
+
+  localize(faText, enText) {
+    return this.isPersianLocale() ? faText : (enText !== undefined ? enText : faText);
+  },
+
   // ---------- Storage ----------
   _loadMap() {
     try {
@@ -55,51 +68,40 @@ AttachmentLocker = {
     if (!rec) return true;
     let win = windowHint || Zotero.getMainWindow();
     let ps = Services.prompt;
-    let text = 'برای دسترسی به فایل، رمز را وارد کنید:';
+    const promptTitle = this.localize('ورود به فایل', 'Attachment Password');
+    const promptText = this.localize('برای دسترسی به فایل، رمز را وارد کنید:', 'Enter the attachment password to continue:');
+    const errorTitle = this.localize('خطا', 'Error');
+    const errorMsg = this.localize('رمز نادرست است.', 'Incorrect password.');
     let passObj = { value: '' };
-    let ok = ps.promptPassword(win, 'ورود به فایل', text, passObj, null, {});
+    let ok = ps.promptPassword(win, promptTitle, promptText, passObj, null, {});
     if (!ok) return false;
     let good = this._hash(rec.salt + '|' + passObj.value) === rec.hash;
-    if (!good) { ps.alert(win, 'خطا', 'رمز نادرست است.'); }
+    if (!good) { ps.alert(win, errorTitle, errorMsg); }
     return good;
   },
 
   async _promptSetPassword(win) {
-    // Revert to two-step native prompt dialogs for a clean, consistent UI
-    const ps = Services.prompt;
-    const invalidMsg = 'رمز یا تکرار آن قابل قبول نیست، لطفا دوباره تلاش کنید';
+    win = win || Zotero.getMainWindow();
+    const errorTitle = this.localize('خطا', 'Error');
+    const invalidMsg = this.localize('رمز باید بین ۶ تا ۲۲ کاراکتر باشد.', 'Password must be 6–22 characters long.');
+    const mismatchMsg = this.localize('تکرار رمز با مقدار اصلی یکسان نیست.', 'Passwords do not match.');
     while (true) {
-      let p1 = { value: '' };
-      let ok1 = ps.promptPassword(
-        win,
-        'رمزگذاری فایل',
-        'رمز باید بین ۶ تا ۲۲ کاراکتر باشد.\n\nرمز را وارد کنید:',
-        p1,
-        null,
-        {}
-      );
-      if (!ok1) return null;
-
-      let p2 = { value: '' };
-      let ok2 = ps.promptPassword(
-        win,
-        'تکرار رمز',
-        'تکرار رمز را وارد کنید:',
-        p2,
-        null,
-        {}
-      );
-      if (!ok2) return null;
-
-      let pw = p1.value || '';
-      let rep = p2.value || '';
-      if (!this._validatePassword(pw) || pw !== rep) {
-        ps.alert(win, 'خطا', invalidMsg);
+      const result = await this._showPasswordPanel(win);
+      if (!result || !result.ok) return null;
+      const pw = result.password || '';
+      const rep = result.repeat || '';
+      if (!this._validatePassword(pw)) {
+        Services.prompt.alert(win, errorTitle, invalidMsg);
+        continue;
+      }
+      if (pw !== rep) {
+        Services.prompt.alert(win, errorTitle, mismatchMsg);
         continue;
       }
       return pw;
     }
   },
+
   _validatePassword(pw) {
     // Rule: any combination of letters/numbers/symbols, length 6..22
     return !!pw && pw.length >= 6 && pw.length <= 22;
@@ -124,38 +126,59 @@ AttachmentLocker = {
     wrap.style.gap = '8px';
 
     const rules = doc.createElementNS(xhtml, 'div');
-    rules.textContent = 'رمز باید بین ۶ تا ۲۲ کاراکتر باشد.';
+    rules.textContent = this.localize('رمز باید بین ۶ تا ۲۲ کاراکتر باشد.', 'Password must be 6–22 characters long.');
     rules.style.fontSize = '12px';
     rules.style.color = '#555';
 
     const row1 = doc.createElementNS(xhtml, 'div');
+    row1.style.display = 'flex';
+    row1.style.flexDirection = 'column';
+    row1.style.gap = '4px';
     const lbl1 = doc.createElementNS(xhtml, 'label');
-    lbl1.textContent = 'رمز:';
+    lbl1.textContent = this.localize('رمز:', 'Password:');
     const inp1 = doc.createElementNS(xhtml, 'input');
-    inp1.type = 'password'; inp1.id = 'tu-pw-input';
+    inp1.type = 'password';
+    inp1.id = 'tu-pw-input';
     inp1.style.padding = '6px 8px';
-    row1.appendChild(lbl1); row1.appendChild(inp1);
+    row1.appendChild(lbl1);
+    row1.appendChild(inp1);
 
     const row2 = doc.createElementNS(xhtml, 'div');
+    row2.style.display = 'flex';
+    row2.style.flexDirection = 'column';
+    row2.style.gap = '4px';
     const lbl2 = doc.createElementNS(xhtml, 'label');
-    lbl2.textContent = 'تکرار رمز:';
+    lbl2.textContent = this.localize('تکرار رمز:', 'Repeat password:');
     const inp2 = doc.createElementNS(xhtml, 'input');
-    inp2.type = 'password'; inp2.id = 'tu-pw-repeat';
+    inp2.type = 'password';
+    inp2.id = 'tu-pw-repeat';
     inp2.style.padding = '6px 8px';
-    row2.appendChild(lbl2); row2.appendChild(inp2);
+    row2.appendChild(lbl2);
+    row2.appendChild(inp2);
 
     const btns = doc.createElementNS(xhtml, 'div');
-    btns.style.display = 'flex'; btns.style.justifyContent = 'flex-end'; btns.style.gap = '8px';
-    const cancel = doc.createElementNS(xhtml, 'button'); cancel.textContent = 'انصراف';
-    const ok = doc.createElementNS(xhtml, 'button'); ok.textContent = 'تایید';
-    btns.appendChild(cancel); btns.appendChild(ok);
+    btns.style.display = 'flex';
+    btns.style.justifyContent = 'flex-end';
+    btns.style.gap = '8px';
+    const cancel = doc.createElementNS(xhtml, 'button');
+    cancel.type = 'button';
+    cancel.textContent = this.localize('انصراف', 'Cancel');
+    const ok = doc.createElementNS(xhtml, 'button');
+    ok.type = 'button';
+    ok.textContent = this.localize('تأیید', 'Confirm');
+    btns.appendChild(cancel);
+    btns.appendChild(ok);
 
-    wrap.appendChild(rules); wrap.appendChild(row1); wrap.appendChild(row2); wrap.appendChild(btns);
+    wrap.appendChild(rules);
+    wrap.appendChild(row1);
+    wrap.appendChild(row2);
+    wrap.appendChild(btns);
     panel.appendChild(wrap);
 
     doc.documentElement.appendChild(panel);
 
     panel.__tu_getValues = () => ({ password: inp1.value, repeat: inp2.value });
+    panel.__tu_reset = () => { inp1.value = ''; inp2.value = ''; };
     panel.__tu_focus = () => inp1.focus();
     panel.__tu_buttons = { ok, cancel };
     return panel;
@@ -166,12 +189,14 @@ AttachmentLocker = {
       try {
         const panel = this._ensurePasswordPanel(win);
         const { ok, cancel } = panel.__tu_buttons;
+        const reset = panel.__tu_reset || (() => {});
 
         const cleanup = () => {
           panel.hidePopup();
           ok.removeEventListener('click', onOk);
           cancel.removeEventListener('click', onCancel);
           win.removeEventListener('keydown', onKey);
+          reset();
         };
         const onOk = () => { const v = panel.__tu_getValues(); cleanup(); resolve({ ok: true, ...v }); };
         const onCancel = () => { cleanup(); resolve({ ok: false }); };
@@ -183,6 +208,7 @@ AttachmentLocker = {
         // Center on screen
         const x = win.screenX + Math.max(0, (win.outerWidth - 380) / 2);
         const y = win.screenY + Math.max(0, (win.outerHeight - 220) / 2);
+        reset();
         panel.openPopupAtScreen(x, y, true);
         panel.__tu_focus();
       } catch (e) { this.log('_showPasswordPanel error: ' + e); resolve({ ok: false }); }
@@ -212,7 +238,7 @@ AttachmentLocker = {
                 }
                 ctx.menuElem.hidden = false;
                 let item = items[0];
-                let label = this.isLocked(item) ? 'برداشتن رمز فایل' : 'رمزگذاری';
+                let label = this.isLocked(item) ? this.localize('برداشتن رمز فایل', 'Remove Password') : this.localize('رمزگذاری', 'Lock Attachment');
                 ctx.menuElem.setAttribute('label', label);
                 ctx.setEnabled(true);
               } catch {}
@@ -226,7 +252,7 @@ AttachmentLocker = {
                 ctx.menuElem.hidden = !enabled;
                 if (!enabled) return;
                 let item = items[0];
-                let label = this.isLocked(item) ? 'برداشتن رمز فایل' : 'رمزگذاری';
+                let label = this.isLocked(item) ? this.localize('برداشتن رمز فایل', 'Remove Password') : this.localize('رمزگذاری', 'Lock Attachment');
                 ctx.menuElem.setAttribute('label', label);
                 ctx.setEnabled(true);
               } catch {}
@@ -239,13 +265,13 @@ AttachmentLocker = {
               if (this.isLocked(item)) {
                 if (await this._checkPassword(item, win)) {
                   this.clearLock(item);
-                  Services.prompt.alert(win, 'موفق', 'رمز فایل حذف شد.');
+                  Services.prompt.alert(win, this.localize('موفق', 'Success'), this.localize('رمز فایل حذف شد.', 'Attachment unlocked.'));
                 }
               } else {
                 let pw = await this._promptSetPassword(win);
                 if (pw) {
                   this.setLock(item, pw);
-                  Services.prompt.alert(win, 'موفق', 'فایل رمزگذاری شد.');
+                  Services.prompt.alert(win, this.localize('موفق', 'Success'), this.localize('فایل رمزگذاری شد.', 'Attachment locked.'));
                 }
               }
             }
@@ -346,13 +372,13 @@ AttachmentLocker = {
                 if (AttachmentLocker.isLocked(item)) {
                   if (await AttachmentLocker._checkPassword(item, window)) {
                     AttachmentLocker.clearLock(item);
-                    Services.prompt.alert(window, 'موفق', 'رمز فایل حذف شد.');
+                    Services.prompt.alert(window, AttachmentLocker.localize('موفق', 'Success'), AttachmentLocker.localize('رمز فایل حذف شد.', 'Attachment unlocked.'));
                   }
                 } else {
                   let pw = await AttachmentLocker._promptSetPassword(window);
                   if (pw) {
                     AttachmentLocker.setLock(item, pw);
-                    Services.prompt.alert(window, 'موفق', 'فایل رمزگذاری شد.');
+                    Services.prompt.alert(window, AttachmentLocker.localize('موفق', 'Success'), AttachmentLocker.localize('فایل رمزگذاری شد.', 'Attachment locked.'));
                   }
                 }
               } catch (e) { AttachmentLocker.log('command error: ' + e); }
@@ -365,7 +391,7 @@ AttachmentLocker = {
             let show = items.length === 1 && items[0].isAttachment();
             mi.hidden = !show;
             if (show) {
-              mi.setAttribute('label', AttachmentLocker.isLocked(items[0]) ? 'برداشتن رمز فایل' : 'رمزگذاری');
+              mi.setAttribute('label', AttachmentLocker.isLocked(items[0]) ? AttachmentLocker.localize('برداشتن رمز فایل', 'Remove Password') : AttachmentLocker.localize('رمزگذاری', 'Lock Attachment'));
             }
           } catch {}
         };

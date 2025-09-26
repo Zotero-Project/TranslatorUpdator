@@ -60,19 +60,55 @@ TranslatorUpdator = {
   async registerHelpPanes() {
     try {
       if (this.helpPaneIDs && this.helpPaneIDs.length) return;
+      const paneTranslators = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-translators',
+        label: (Zotero.locale || '').startsWith('fa') ? 'راهنمای مترجم‌ها' : 'Translator Guide',
+        src: 'prefs/help_translators.xhtml'
+      });
       const pane1 = await Zotero.PreferencePanes.register({
         pluginID: this.id,
         id: 'tu-prefpane-help-addtab',
-        label: '?????? ??',
+        label: (Zotero.locale || '').startsWith('fa') ? 'افزودن تب' : 'Add Extra Tabs',
         src: 'prefs/help_addtab.xhtml'
       });
       const pane2 = await Zotero.PreferencePanes.register({
         pluginID: this.id,
         id: 'tu-prefpane-help-clipboard',
-        label: '?????? ???? ?? ?????? ?? ???? ??????',
+        label: (Zotero.locale || '').startsWith('fa') ? 'انتقال فایل از ویندوز با کلید میانبر' : 'Clipboard Import Shortcuts',
         src: 'prefs/help_clipboard.xhtml'
       });
-      this.helpPaneIDs = [pane1, pane2];
+      const pane3 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-collections-highlight',
+        label: (Zotero.locale || '').startsWith('fa') ? 'نمایش پوشهٔ مرتبط در درخت' : 'Highlight Collection in Tree',
+        src: 'prefs/help_collections_highlight.xhtml'
+      });
+      const pane4 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-zoom',
+        label: (Zotero.locale || '').startsWith('fa') ? 'بزرگ‌نمایی رابط کاربری' : 'UI Zoom Controls',
+        src: 'prefs/help_zoom.xhtml'
+      });
+      const pane5 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-plugin-settings',
+        label: (Zotero.locale || '').startsWith('fa') ? 'تنظیمات و پشتیبانی افزونه' : 'Plugin Settings & Support',
+        src: 'prefs/help_plugin_settings.xhtml'
+      });
+      const pane6 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-context-actions',
+        label: (Zotero.locale || '').startsWith('fa') ? 'میانبرهای راست‌کلیک' : 'Context Menu Actions',
+        src: 'prefs/help_context_actions.xhtml'
+      });
+      const pane7 = await Zotero.PreferencePanes.register({
+        pluginID: this.id,
+        id: 'tu-prefpane-help-encryption',
+        label: (Zotero.locale || '').startsWith('fa') ? 'راهنمای رمزگذاری فایل' : 'Attachment Encryption Guide',
+        src: 'prefs/help_encryption.xhtml'
+      });
+      this.helpPaneIDs = [paneTranslators, pane1, pane2, pane3, pane4, pane5, pane6, pane7];
       this.log('Registered help preference panes: ' + JSON.stringify(this.helpPaneIDs));
     } catch (e) {
       this.log('Error registering help panes: ' + e);
